@@ -1,7 +1,6 @@
 package com.amazon.ata.maps;
 
-import java.util.Collections;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Stores the relationships between movies and actors, allowing releasing a new movie
@@ -9,6 +8,11 @@ import java.util.Set;
  * unreleasing a movie completely, and querying actors by movie and vice versa.
  */
 public class Imdb {
+    private Map<Movie,Set<Actor>> db;
+
+    public Imdb(){
+        db=new HashMap<>();
+    }
 
     /**
      * Adds the new movie to the set of movies that an actor has appeared in.
@@ -20,6 +24,7 @@ public class Imdb {
      */
     public void releaseMovie(Movie movie, Set<Actor> actors) {
         //TODO
+            db.put(movie,actors);
     }
 
     /**
@@ -32,6 +37,10 @@ public class Imdb {
      */
     public boolean removeMovie(Movie movie) {
         // TODO: replace
+        if(db.containsKey(movie)){
+            db.remove(movie);
+            return true;
+        }
         return false;
     }
 
@@ -47,6 +56,18 @@ public class Imdb {
      */
     public void tagActorInMovie(Movie movie, Actor actor) {
         //TODO
+        Set<Actor> actr=new HashSet<>();
+        if (db.containsKey(movie)){
+            actr=getActorsInMovie(movie);
+            if (!actr.contains(actor)){
+                actr.add(actor);
+                System.out.println("Actor "+actor.toString()+" tagged to movie "+movie.toString());
+            }
+           db.put(movie,actr); 
+        }else {           
+            actr.add(actor);
+            db.put(movie, actr);
+        }
     }
 
     /**
@@ -58,7 +79,15 @@ public class Imdb {
      */
     public Set<Actor> getActorsInMovie(Movie movie) {
         // TODO: replace
-        return Collections.EMPTY_SET;
+        for (Map.Entry<Movie, Set<Actor>> entry : db.entrySet()) {
+            if (entry.getKey().getName().equals(movie.getName())) {
+                return entry.getValue();
+            }
+        }
+
+        throw new IllegalArgumentException("Movie is not released yet!!");
+
+
     }
 
     /**
@@ -70,7 +99,14 @@ public class Imdb {
      */
     public Set<Movie> getMoviesForActor(Actor actor) {
         // TODO: replace
-        return Collections.EMPTY_SET;
+        Set<Movie> movies=new HashSet<>();
+      for(Map.Entry<Movie,Set<Actor>> entry:db.entrySet()){
+          Set<Actor> a=db.get(entry.getKey());
+          if (a.contains(actor)){
+              movies.add(entry.getKey());
+          }
+      }
+        return movies;
     }
 
     /**
@@ -80,7 +116,15 @@ public class Imdb {
      */
     public Set<Actor> getAllActorsInIMDB() {
         // TODO: replace
-        return Collections.EMPTY_SET;
+        Set<Actor> actrosInImdb=new HashSet<>();
+        for(Map.Entry<Movie,Set<Actor>> entry: db.entrySet()){
+            for(Actor a:entry.getValue()){
+                if(!actrosInImdb.contains(a)){
+                    actrosInImdb.add(a);
+                }
+            }
+        }
+        return actrosInImdb;
     }
 
     /**
@@ -94,6 +138,10 @@ public class Imdb {
      */
     public int getTotalNumCredits() {
         // TODO: replace
-        return 0;
+        int total=0;
+        for(Map.Entry<Movie,Set<Actor>> entry:db.entrySet()){
+            total+=entry.getValue().size();
+        }
+        return total;
     }
 }
